@@ -41,7 +41,7 @@
 
     .wrap{
       width:100%;
-      max-width:1100px;
+      max-width:1280px;
       margin:0 auto;
     }
 
@@ -92,6 +92,15 @@
       background:#fff;
     }
 
+    /* 上部レイアウト：左に統計、右に要チェック */
+    .top-grid{
+      display:grid;
+      grid-template-columns:1.65fr 1fr;
+      gap:16px;
+      align-items:start;
+      margin-bottom:16px;
+    }
+
     .stats{
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -103,6 +112,7 @@
       border-radius:16px;
       padding:14px;
       background:#fff;
+      min-height:104px;
     }
 
     .stat-label{
@@ -115,37 +125,7 @@
       font-size:32px;
       font-weight:700;
       line-height:1;
-    }
-
-    .filters{
-      display:grid;
-      grid-template-columns:1.2fr .9fr .8fr .9fr auto;
-      gap:10px;
-      margin-bottom:16px;
-      align-items:center;
-    }
-
-    input, select, textarea{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:12px;
-      padding:12px 14px;
-      background:#fff;
-      color:var(--text);
-    }
-
-    .toggle-box{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      white-space:nowrap;
-      padding:0 4px;
-    }
-
-    .toggle-box input[type="checkbox"]{
-      width:auto;
-      margin:0;
-      transform:scale(1.1);
+      margin-top:24px;
     }
 
     .section-title{
@@ -157,6 +137,7 @@
     .check-list{
       display:grid;
       gap:12px;
+      max-height:100%;
     }
 
     .check-item{
@@ -185,9 +166,39 @@
       overflow-wrap:anywhere;
     }
 
+    .filters{
+      display:grid;
+      grid-template-columns:1.2fr .9fr .8fr .9fr auto;
+      gap:10px;
+      align-items:center;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 14px;
+      background:#fff;
+      color:var(--text);
+    }
+
+    .toggle-box{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      padding:0 4px;
+    }
+
+    .toggle-box input[type="checkbox"]{
+      width:auto;
+      margin:0;
+      transform:scale(1.1);
+    }
+
     .cards{
       display:grid;
-      gap:14px;
+      gap:16px;
     }
 
     .job-card{
@@ -195,9 +206,9 @@
       border:1px solid var(--line);
       border-radius:20px;
       box-shadow:var(--shadow);
-      padding:16px;
+      padding:20px 24px;
       display:grid;
-      gap:12px;
+      gap:14px;
     }
 
     .job-card.stale{
@@ -249,26 +260,32 @@
       background:var(--danger);
     }
 
+    /* PCで横長に見やすく */
     .job-grid{
       display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:12px 16px;
+      grid-template-columns:1.35fr .65fr;
+      gap:18px 28px;
+      align-items:start;
     }
 
     .field{
       min-width:0;
     }
 
+    .field.full{
+      grid-column:1 / -1;
+    }
+
     .label{
       font-size:13px;
       color:var(--muted);
-      margin-bottom:4px;
+      margin-bottom:6px;
     }
 
     .value{
       font-size:18px;
       font-weight:600;
-      line-height:1.5;
+      line-height:1.55;
       word-break:break-word;
       overflow-wrap:anywhere;
     }
@@ -365,17 +382,20 @@
       font-size:14px;
     }
 
-    @media (max-width: 900px){
+    @media (max-width: 1024px){
+      .top-grid{
+        grid-template-columns:1fr;
+      }
+
       .stats{
         grid-template-columns:repeat(2,1fr);
       }
+
       .filters{
-        grid-template-columns:1fr;
+        grid-template-columns:1fr 1fr;
       }
+
       .job-grid{
-        grid-template-columns:1fr;
-      }
-      .form-grid{
         grid-template-columns:1fr;
       }
     }
@@ -407,6 +427,10 @@
         grid-template-columns:1fr 1fr;
       }
 
+      .filters{
+        grid-template-columns:1fr;
+      }
+
       .job-header{
         flex-direction:column;
         align-items:flex-start;
@@ -427,6 +451,10 @@
       .value.small{
         font-size:15px;
       }
+
+      .form-grid{
+        grid-template-columns:1fr;
+      }
     }
   </style>
 </head>
@@ -440,24 +468,31 @@
       <input id="importFile" type="file" accept=".json" style="display:none">
     </div>
 
-    <div class="panel">
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">案件数</div>
-          <div class="stat-value" id="statTotal">0</div>
+    <div class="top-grid">
+      <div class="panel">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-label">案件数</div>
+            <div class="stat-value" id="statTotal">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">面談予定</div>
+            <div class="stat-value" id="statInterview">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">契約中</div>
+            <div class="stat-value" id="statActive">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">納品済</div>
+            <div class="stat-value" id="statDone">0</div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="stat-label">面談予定</div>
-          <div class="stat-value" id="statInterview">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">契約中</div>
-          <div class="stat-value" id="statActive">0</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">納品済</div>
-          <div class="stat-value" id="statDone">0</div>
-        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title">要チェック</div>
+        <div id="checkList" class="check-list"></div>
       </div>
     </div>
 
@@ -491,11 +526,6 @@
           <span>終了を表示</span>
         </label>
       </div>
-    </div>
-
-    <div class="panel">
-      <div class="section-title">要チェック</div>
-      <div id="checkList" class="check-list"></div>
     </div>
 
     <div id="cards" class="cards"></div>
@@ -570,8 +600,8 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "sidejob_manager_v5";
-    const UI_STORAGE_KEY = "sidejob_manager_ui_v1";
+    const STORAGE_KEY = "sidejob_manager_v6";
+    const UI_STORAGE_KEY = "sidejob_manager_ui_v2";
 
     const initialJobs = [
       {
@@ -686,8 +716,7 @@
     }
 
     function formatDate(dateStr){
-      if(!dateStr) return "";
-      return dateStr;
+      return dateStr || "";
     }
 
     function daysSince(dateStr){
@@ -706,17 +735,16 @@
       return days !== null && days >= 7;
     }
 
-    function renderStats(){
-      const visibleJobs = jobs.filter(j => uiState.showEnded || j.status !== "終了");
-      const total = visibleJobs.length;
-      const interview = visibleJobs.filter(j => j.status === "面談予定").length;
-      const active = visibleJobs.filter(j => j.status === "契約中").length;
-      const done = visibleJobs.filter(j => j.status === "納品済").length;
+    function getVisibleJobsBase(){
+      return jobs.filter(j => uiState.showEnded || j.status !== "終了");
+    }
 
-      document.getElementById("statTotal").textContent = total;
-      document.getElementById("statInterview").textContent = interview;
-      document.getElementById("statActive").textContent = active;
-      document.getElementById("statDone").textContent = done;
+    function renderStats(){
+      const visibleJobs = getVisibleJobsBase();
+      document.getElementById("statTotal").textContent = visibleJobs.length;
+      document.getElementById("statInterview").textContent = visibleJobs.filter(j => j.status === "面談予定").length;
+      document.getElementById("statActive").textContent = visibleJobs.filter(j => j.status === "契約中").length;
+      document.getElementById("statDone").textContent = visibleJobs.filter(j => j.status === "納品済").length;
     }
 
     function renderCheckList(filteredJobs){
@@ -816,7 +844,7 @@
               <div class="value small">${escapeHtml(formatDate(j.lastDate || ""))}</div>
             </div>
 
-            <div class="field" style="grid-column:1 / -1;">
+            <div class="field full">
               <div class="label">メモ</div>
               <div class="value small memo">${nl2br(j.memo || "")}</div>
             </div>
@@ -900,7 +928,6 @@
     }
 
     document.getElementById("resetBtn").addEventListener("click", resetForm);
-
     document.getElementById("searchInput").addEventListener("input", renderCards);
     document.getElementById("statusFilter").addEventListener("change", renderCards);
     document.getElementById("priorityFilter").addEventListener("change", renderCards);
