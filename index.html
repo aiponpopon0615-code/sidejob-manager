@@ -2,323 +2,844 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>副業管理</title>
   <style>
     :root{
-      --line:#eadde5;--text:#3a2d35;--muted:#7a6871;--pink:#ff7aa7;--yellow:#fff3bf;--green:#daf5df;--blue:#dff1ff;--gray:#f2f4f7;--shadow:0 8px 24px rgba(60,30,50,.08);
+      --bg:#fff8fb;
+      --card:#ffffff;
+      --line:#eadde5;
+      --text:#3a2d35;
+      --muted:#7a6871;
+      --pink:#ffeaf3;
+      --yellow:#fff3bf;
+      --green:#daf5df;
+      --purple:#ece4ff;
+      --blue:#eaf3ff;
+      --danger:#ffe2e2;
+      --shadow:0 8px 24px rgba(58,45,53,.06);
+      --radius:18px;
     }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fff8fb 0%, #fff 100%);color:var(--text)}
-    .wrap{max-width:1280px;margin:0 auto;padding:24px}
-    h1{margin:0 0 8px;font-size:30px}
-    .sub{color:var(--muted);margin-bottom:20px}
-    .panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
-    .top-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-    .stat{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}
-    .stat strong{display:block;font-size:28px;margin-top:6px}
-    .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
-    input,select,textarea,button{font:inherit}
-    input,select,textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
-    button{border:none;border-radius:12px;padding:10px 14px;cursor:pointer;background:var(--pink);color:white;font-weight:700}
-    button.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
-    button.ghost{background:#fff5f8;color:#b13d67;border:1px solid #ffc3d6}
-    .table-wrap{overflow:auto}
-    table{width:100%;border-collapse:separate;border-spacing:0 10px;min-width:1180px}
-    th{font-size:13px;color:var(--muted);text-align:left;padding:0 10px 6px}
-    td{background:#fff;padding:14px 10px;vertical-align:top;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-    td:first-child{border-left:1px solid var(--line);border-radius:14px 0 0 14px}
-    td:last-child{border-right:1px solid var(--line);border-radius:0 14px 14px 0}
-    tr.priority td{background:#fff4f8;border-top:1px solid #ffc3d6;border-bottom:1px solid #ffc3d6}
-    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
-    .b-interview{background:var(--yellow);color:#7a5b00}
-    .b-progress{background:var(--green);color:#21603a}
-    .b-contract{background:#e7e2ff;color:#4b3396}
-    .b-review{background:var(--blue);color:#15517a}
-    .b-check{background:var(--gray);color:#4d5966}
-    .b-consult{background:#fff0d9;color:#8a5b00}
-    .muted{color:var(--muted);font-size:13px}
-    .small{font-size:12px;color:var(--muted)}
-    .actions{display:flex;gap:8px;flex-wrap:wrap}
-    .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .form-grid .full{grid-column:1/-1}
-    .right-note{font-size:13px;color:var(--muted);line-height:1.7}
-    .urgent-item{padding:10px 0;border-bottom:1px dashed #eadbe3}
-    .urgent-item:last-child{border-bottom:none;padding-bottom:0}
-    .urgent-client{font-size:14px;margin-bottom:4px;color:var(--text)}
-    .urgent-status{font-size:13px;margin-bottom:2px}
-    .urgent-memo{color:var(--muted)}
-    .deadline-box{display:flex;flex-direction:column;gap:10px}
-    .todo{border:1px dashed #ffb6cc;border-radius:14px;padding:12px;background:#fff8fb}
-    .todo strong{display:block;margin-bottom:6px}
-    .empty{padding:18px;text-align:center;color:var(--muted)}
-    .cell-title{font-weight:700;margin-bottom:4px}
-    .status-block{display:flex;flex-direction:column;gap:6px}
-    .status-memo{font-size:12px;color:var(--muted);line-height:1.5;background:#faf7f9;border:1px dashed var(--line);padding:8px 10px;border-radius:10px}
-    @media (max-width:900px){.top-grid,.form-grid,.stats{grid-template-columns:1fr}.wrap{padding:14px}h1{font-size:24px}}
-    @media screen and (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
+    html,body{
+      margin:0;
+      padding:0;
+      background:linear-gradient(180deg,#fff8fb 0%,#fffdfd 100%);
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      overflow-x:hidden;
+    }
 
-  .top-grid,
-  .main-grid,
-  .table-head,
-  .item-row,
-  .row {
-    display: block !important;
-    grid-template-columns: 1fr !important;
-  }
+    body{
+      padding:16px;
+    }
 
-  .card,
-  .panel,
-  .item-card {
-    width: 100% !important;
-    box-sizing: border-box;
-  }
+    .wrap{
+      width:100%;
+      max-width:1100px;
+      margin:0 auto;
+    }
 
-  .item-row > div,
-  .row > div,
-  .cell {
-    width: 100% !important;
-    display: block !important;
-    margin-bottom: 8px;
-  }
+    h1{
+      margin:0 0 16px;
+      font-size:32px;
+      line-height:1.2;
+    }
 
-  .contract-name,
-  .client-name,
-  .memo,
-  .status-memo {
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
+    .panel{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+      margin-bottom:16px;
+    }
 
-  table {
-    display: block;
-    width: 100%;
-    overflow-x: hidden;
-  }
-}
+    .top-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+
+    button,
+    select,
+    input,
+    textarea{
+      font:inherit;
+    }
+
+    button{
+      border:none;
+      border-radius:14px;
+      padding:12px 16px;
+      background:#fff;
+      border:1px solid var(--line);
+      cursor:pointer;
+      color:var(--text);
+    }
+
+    button:hover{
+      opacity:.95;
+    }
+
+    .primary{
+      background:#fff;
+    }
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .stat{
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:14px;
+      background:#fff;
+    }
+
+    .stat-label{
+      font-size:14px;
+      color:var(--muted);
+      margin-bottom:8px;
+    }
+
+    .stat-value{
+      font-size:32px;
+      font-weight:700;
+      line-height:1;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:1.2fr .8fr .8fr;
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:12px 14px;
+      background:#fff;
+      color:var(--text);
+    }
+
+    .section-title{
+      font-size:22px;
+      font-weight:700;
+      margin:0 0 12px;
+    }
+
+    .check-list{
+      display:grid;
+      gap:12px;
+    }
+
+    .check-item{
+      border:1px dashed #f2b9cb;
+      background:#fffafb;
+      border-radius:16px;
+      padding:14px;
+    }
+
+    .check-client{
+      font-weight:700;
+      font-size:18px;
+      margin-bottom:6px;
+      word-break:break-word;
+    }
+
+    .check-status{
+      font-weight:600;
+      margin-bottom:6px;
+      word-break:break-word;
+    }
+
+    .check-memo{
+      color:var(--muted);
+      word-break:break-word;
+      overflow-wrap:anywhere;
+    }
+
+    .cards{
+      display:grid;
+      gap:14px;
+    }
+
+    .job-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:16px;
+      display:grid;
+      gap:12px;
+    }
+
+    .job-header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .priority-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:700;
+      min-width:86px;
+      white-space:nowrap;
+    }
+
+    .priority-最重要{background:var(--yellow)}
+    .priority-重要{background:var(--green)}
+    .priority-確認中{background:#f5e7bf}
+    .priority-普通{background:var(--blue)}
+    .priority-待機{background:var(--purple)}
+
+    .job-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .tiny{
+      padding:10px 12px;
+      font-size:14px;
+    }
+
+    .danger{
+      background:var(--danger);
+    }
+
+    .job-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px 16px;
+    }
+
+    .field{
+      min-width:0;
+    }
+
+    .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+
+    .value{
+      font-size:18px;
+      font-weight:600;
+      line-height:1.5;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+    }
+
+    .value.small{
+      font-size:16px;
+      font-weight:500;
+    }
+
+    .status-pill{
+      display:inline-block;
+      padding:7px 12px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:700;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+
+    .status-面談予定{
+      background:#ffe8ee;
+      border-color:#f6c1cf;
+    }
+    .status-契約中{
+      background:#eef9ef;
+      border-color:#bfe3c4;
+    }
+    .status-進行中{
+      background:#eef9ef;
+      border-color:#bfe3c4;
+    }
+    .status-納品済{
+      background:#eef4ff;
+      border-color:#c7d8ff;
+    }
+    .status-相談中{
+      background:#fff5df;
+      border-color:#ecd7a1;
+    }
+    .status-契約リクエスト中{
+      background:#f1ebff;
+      border-color:#d8cbff;
+    }
+
+    details.form-wrap{
+      margin-top:18px;
+    }
+
+    details summary{
+      cursor:pointer;
+      font-weight:700;
+      font-size:18px;
+      list-style:none;
+    }
+
+    details summary::-webkit-details-marker{
+      display:none;
+    }
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      margin-top:14px;
+    }
+
+    .form-grid .full{
+      grid-column:1 / -1;
+    }
+
+    .save-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    @media (max-width: 900px){
+      .stats{
+        grid-template-columns:repeat(2,1fr);
+      }
+      .filters{
+        grid-template-columns:1fr;
+      }
+      .job-grid{
+        grid-template-columns:1fr;
+      }
+      .form-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 640px){
+      body{
+        padding:12px;
+      }
+
+      h1{
+        font-size:28px;
+      }
+
+      .panel,
+      .job-card{
+        padding:14px;
+      }
+
+      .top-actions{
+        display:grid;
+        grid-template-columns:1fr 1fr;
+      }
+
+      .top-actions button{
+        width:100%;
+      }
+
+      .stats{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .job-header{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .job-actions{
+        width:100%;
+      }
+
+      .job-actions button{
+        flex:1 1 auto;
+      }
+
+      .value{
+        font-size:17px;
+      }
+
+      .value.small{
+        font-size:15px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>副業管理</h1>
-    <div class="top-grid">
-      <div class="panel"><div class="stats" id="stats"></div></div>
-      <div class="panel deadline-box">
-        <div class="todo"><strong>要チェック</strong><div id="urgentList" class="right-note"></div></div>
-        <div class="right-note">・データはこのブラウザに自動保存されます。<br>・「データを保存」でバックアップできます。<br>・HTMLファイルを開くだけで使えます。</div>
+
+    <div class="top-actions">
+      <button id="exportBtn" class="primary">データを保存</button>
+      <button id="importBtn" class="primary">保存データを読み込む</button>
+      <input id="importFile" type="file" accept=".json" style="display:none">
+    </div>
+
+    <div class="panel">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">案件数</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">面談予定</div>
+          <div class="stat-value" id="statInterview">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">進行中・契約中</div>
+          <div class="stat-value" id="statActive">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">検収・納品後</div>
+          <div class="stat-value" id="statDone">0</div>
+        </div>
       </div>
     </div>
+
     <div class="panel">
       <div class="filters">
-        <div style="flex:2;min-width:220px"><input id="searchInput" placeholder="クライアント名・契約名・状況・状況メモで検索" /></div>
-        <div style="flex:1;min-width:180px">
-          <select id="statusFilter">
-            <option value="">すべての状況</option>
-            <option>面談予定</option>
-            <option>進行中</option>
-            <option>契約中</option>
-            <option>納品済</option>
-            <option>検収中</option>
-            <option>相談中</option>
-            <option>契約リクエスト中</option>
-          </select>
-        </div>
-        <button class="secondary" id="sortUrgentBtn">重要順に並べる</button>
-        <button class="secondary" id="exportBtn">データを保存</button>
-        <button class="secondary" id="importBtn">保存データを読み込む</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none" />
+        <input id="searchInput" type="text" placeholder="検索（クライアント名・契約名・状況メモなど）">
+        <select id="statusFilter">
+          <option value="">すべての状況</option>
+          <option value="面談予定">面談予定</option>
+          <option value="契約中">契約中</option>
+          <option value="進行中">進行中</option>
+          <option value="納品済">納品済</option>
+          <option value="相談中">相談中</option>
+          <option value="契約リクエスト中">契約リクエスト中</option>
+        </select>
+        <select id="priorityFilter">
+          <option value="">すべての優先</option>
+          <option value="最重要">最重要</option>
+          <option value="重要">重要</option>
+          <option value="確認中">確認中</option>
+          <option value="普通">普通</option>
+          <option value="待機">待機</option>
+        </select>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>優先</th>
-              <th>クライアント</th>
-              <th>契約名</th>
-              <th>業務内容・契約金</th>
-              <th>状況</th>
-              <th>状況メモ</th>
-              <th>最終連絡日</th>
-              <th>メモ</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-      <div id="emptyState" class="empty" style="display:none">該当する案件はありません。</div>
     </div>
+
     <div class="panel">
-      <h2 style="margin-top:0;font-size:20px">案件を追加 / 編集</h2>
-      <div class="form-grid">
-        <input type="hidden" id="editId" />
-        <div><label class="small">クライアント名</label><input id="client" /></div>
-        <div><label class="small">契約名</label><input id="title" /></div>
-        <div class="full"><label class="small">業務内容・契約金</label><textarea id="details" rows="4"></textarea></div>
-        <div><label class="small">状況</label><input id="status" placeholder="例：面談予定 / 契約中 / 納品済 など" /></div>
-        <div><label class="small">状況メモ</label><input id="statusMemo" placeholder="例：2026-03-28(土) 12:00 / 記事作成進行中" /></div>
-        <div><label class="small">最終連絡日</label><input id="lastDate" type="date" /></div>
-        <div class="full"><label class="small">メモ</label><textarea id="memo" rows="3" placeholder="確認したいこと、次にやること など"></textarea></div>
-      </div>
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap"><button id="saveBtn">保存する</button><button class="secondary" id="resetBtn">入力をリセット</button></div>
+      <div class="section-title">要チェック</div>
+      <div id="checkList" class="check-list"></div>
+    </div>
+
+    <div id="cards" class="cards"></div>
+
+    <div class="panel">
+      <details class="form-wrap">
+        <summary>案件を追加 / 編集</summary>
+        <div class="form-grid">
+          <input type="hidden" id="editId">
+
+          <div>
+            <div class="label">優先</div>
+            <select id="fPriority">
+              <option>普通</option>
+              <option>最重要</option>
+              <option>重要</option>
+              <option>確認中</option>
+              <option>待機</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="label">クライアント名</div>
+            <input id="fClient" type="text">
+          </div>
+
+          <div class="full">
+            <div class="label">契約名</div>
+            <input id="fContract" type="text">
+          </div>
+
+          <div class="full">
+            <div class="label">業務内容・契約金</div>
+            <textarea id="fWork" rows="4"></textarea>
+          </div>
+
+          <div>
+            <div class="label">状況</div>
+            <select id="fStatus">
+              <option>面談予定</option>
+              <option>契約中</option>
+              <option>進行中</option>
+              <option>納品済</option>
+              <option>相談中</option>
+              <option>契約リクエスト中</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="label">状況メモ</div>
+            <input id="fStatusMemo" type="text">
+          </div>
+
+          <div>
+            <div class="label">最終連絡日</div>
+            <input id="fLastDate" type="date">
+          </div>
+
+          <div class="full">
+            <div class="label">メモ</div>
+            <textarea id="fMemo" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <button id="saveBtn">保存する</button>
+          <button id="resetBtn" type="button">入力をリセット</button>
+        </div>
+        <div class="muted" style="margin-top:10px;">「面談予定」「契約中」「進行中」は要チェックに自動表示されます。</div>
+      </details>
     </div>
   </div>
-<script>
-const initialData = [
-{id: crypto.randomUUID(),client:'M_Takeuchi',title:'【在宅副業】AIを使ったライティングのサポートスタッフ募集！未経験OK',details:'1記事あたり約2,000文字前後。AI文章のリライト・調整、指定テーマに沿った記事作成、簡単なリサーチやキーワード確認、文章の流れや構成の整理。案件によってはSNS投稿文やブログ記事、商品説明文など。',status:'契約中',statusMemo:'記事作成進行中',lastDate:'2026-03-25',memo:'優先度高め。進行中案件。'},
-{id: crypto.randomUUID(),client:'mp0119',title:'《大人気！1件500円》✨美容クリニック・外科・皮膚科✨に関する経験談を教えてください【写真付きで+750円】',details:'美容クリニックのクチコミ。文章のみ500円、画像付き1,250円。',status:'納品済',statusMemo:'クライアント検収中',lastDate:'2026-03-24',memo:''},
-{id: crypto.randomUUID(),client:'pino_mio',title:'【初心者歓迎！】youtube等の動画台本作成者さま大募集！【主婦・未経験者活躍中！長期継続・在宅OK】',details:'YouTube等のエンタメ動画の台本作成。1週間に1〜2本程度。',status:'契約リクエスト中',statusMemo:'クライアントの同意待ち',lastDate:'2026-03-23',memo:''},
-{id: crypto.randomUUID(),client:'Voiceステージ',title:'【在宅／未経験OK】ライブ配信・音声コンテンツ制作のお仕事',details:'簡単なトーク／ナレーション収録、配信コンテンツ用の音声素材制作、台本に沿ったセリフ収録。',status:'相談中',statusMemo:'ライバー業務か確認中',lastDate:'2026-03-25',memo:'契約内容と実際の業務が違う可能性あり。返答待ち。'},
-{id: crypto.randomUUID(),client:'KAGroup',title:'【在宅・スマホOK】音読するだけの簡単作業｜1000文章 7,500円＋消費税｜継続あり',details:'1000文章：7,500円＋消費税。1文章あたり約7.5円＋消費税。継続の場合最大9000文章まで依頼可能。作業時間目安：約4〜7時間。',status:'納品済',statusMemo:'クライアント検収中',lastDate:'2026-03-25',memo:''},
-{id: crypto.randomUUID(),client:'AI推進事業部',title:'【急募】ChatGPTで作ったAIインフルエンサーに喋ってもらう商品紹介動画の台本制作業務【未経験の方でも応募OK】',details:'AIで作った商品紹介系インフルエンサーに読んでもらう台本制作。約60秒の縦型動画向け。TikTok投稿予定。500円(税込) / 台本1本。',status:'面談予定',statusMemo:'2026-03-28(土) 12:00',lastDate:'2026-03-24',memo:'面談を忘れない。事前に質問をメモしておく。'}
-];
-const STORAGE_KEY = 'sidejob_manager_ai_20260325_v2';
-let items = loadData();
-let urgentSort = true;
 
-function normalizeItem(item){
-  const normalized = structuredClone(item);
-  if (!normalized.statusMemo && typeof normalized.status === 'string' && normalized.status.includes('/')) {
-    const parts = normalized.status.split('/').map(s=>s.trim());
-    normalized.status = parts[0] || '';
-    normalized.statusMemo = parts.slice(1).join(' / ');
-  }
-  normalized.status = normalized.status || '';
-  normalized.statusMemo = normalized.statusMemo || '';
-  normalized.lastDate = normalized.lastDate || '';
-  normalized.memo = normalized.memo || '';
-  normalized.client = normalized.client || '';
-  normalized.title = normalized.title || '';
-  normalized.details = normalized.details || '';
-  normalized.id = normalized.id || crypto.randomUUID();
-  return normalized;
-}
+  <script>
+    const STORAGE_KEY = "sidejob_manager_v4";
 
-function loadData(){
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if(saved){
-    try { return JSON.parse(saved).map(normalizeItem); } catch(e){}
-  }
-  return structuredClone(initialData).map(normalizeItem);
-}
-function saveData(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
-function priorityScore(status=''){ if(/面談予定/.test(status)) return 100; if(/進行中/.test(status)) return 90; if(/契約中/.test(status)) return 85; if(/相談中/.test(status)) return 70; if(/契約リクエスト中/.test(status)) return 60; if(/検収中|納品済/.test(status)) return 40; return 10; }
-function priorityLabel(status=''){ if(/面談予定/.test(status)) return '<span class="badge b-interview">最重要</span>'; if(/進行中|契約中/.test(status)) return '<span class="badge b-progress">重要</span>'; if(/相談中/.test(status)) return '<span class="badge b-consult">確認中</span>'; if(/契約リクエスト中/.test(status)) return '<span class="badge b-contract">待機</span>'; if(/検収中|納品済/.test(status)) return '<span class="badge b-review">検収中</span>'; return '<span class="badge b-check">通常</span>'; }
-function statusBadge(status=''){ let cls='b-check'; if(/面談予定/.test(status)) cls='b-interview'; else if(/進行中/.test(status)) cls='b-progress'; else if(/契約中/.test(status)) cls='b-contract'; else if(/相談中/.test(status)) cls='b-consult'; else if(/検収中|納品済/.test(status)) cls='b-review'; return `<span class="badge ${cls}">${status}</span>`; }
-function renderStats(filtered){
-  const total=filtered.length;
-  const interview=filtered.filter(i=>/面談予定/.test(i.status)).length;
-  const progressing=filtered.filter(i=>/進行中|契約中/.test(i.status)).length;
-  const reviewing=filtered.filter(i=>/検収中|納品済/.test(i.status)).length;
-  document.getElementById('stats').innerHTML=`<div class="stat"><div class="muted">案件数</div><strong>${total}</strong></div><div class="stat"><div class="muted">面談予定</div><strong>${interview}</strong></div><div class="stat"><div class="muted">進行中・契約中</div><strong>${progressing}</strong></div><div class="stat"><div class="muted">検収・納品後</div><strong>${reviewing}</strong></div>`;
-  const urgent=items.filter(i=>/面談予定|進行中|契約中/.test(i.status)).sort((a,b)=>priorityScore(b.status)-priorityScore(a.status)||b.lastDate.localeCompare(a.lastDate));
-  document.getElementById('urgentList').innerHTML=urgent.length
-    ? urgent.map(i=>`<div class="urgent-item"><div class="urgent-client"><strong>${i.client}</strong></div><div class="urgent-status">${i.status}${i.statusMemo?` <span class="small">（${i.statusMemo}）</span>`:''}</div>${i.memo?`<div class="urgent-memo small">${i.memo}</div>`:''}</div>`).join('')
-    : '今のところ最重要案件はありません。';
-}
-function getFilteredItems(){
-  const q=document.getElementById('searchInput').value.trim().toLowerCase();
-  const sf=document.getElementById('statusFilter').value;
-  let filtered=items.filter(item=>{
-    const hit=!q || [item.client,item.title,item.details,item.status,item.statusMemo,item.memo].join(' ').toLowerCase().includes(q);
-    const statusHit=!sf || item.status === sf;
-    return hit && statusHit;
-  });
-  if(urgentSort){ filtered.sort((a,b)=>priorityScore(b.status)-priorityScore(a.status)||b.lastDate.localeCompare(a.lastDate)); }
-  else { filtered.sort((a,b)=>b.lastDate.localeCompare(a.lastDate)); }
-  return filtered;
-}
-function renderTable(){
-  const filtered=getFilteredItems();
-  renderStats(filtered);
-  const tbody=document.getElementById('tbody');
-  const empty=document.getElementById('emptyState');
-  if(!filtered.length){ tbody.innerHTML=''; empty.style.display='block'; return; }
-  empty.style.display='none';
-  tbody.innerHTML=filtered.map(item=>{
-    const isPriority=/面談予定|進行中|契約中/.test(item.status);
-    return `<tr class="${isPriority?'priority':''}">
-      <td>${priorityLabel(item.status)}</td>
-      <td><strong>${item.client}</strong></td>
-      <td>${item.title}</td>
-      <td>${item.details}</td>
-      <td><div class="status-block">${statusBadge(item.status)}</div></td>
-      <td>${item.statusMemo?`<div class="status-memo">${item.statusMemo}</div>`:'<span class="small">-</span>'}</td>
-      <td>${item.lastDate || '<span class="small">-</span>'}</td>
-      <td>${item.memo||'<span class="small">-</span>'}</td>
-      <td><div class="actions"><button class="secondary" onclick="editItem('${item.id}')">編集</button><button class="ghost" onclick="deleteItem('${item.id}')">削除</button></div></td>
-    </tr>`;
-  }).join('');
-}
-function resetForm(){ ['editId','client','title','details','status','statusMemo','lastDate','memo'].forEach(id=>document.getElementById(id).value=''); }
-function editItem(id){
-  const item=items.find(i=>i.id===id); if(!item) return;
-  document.getElementById('editId').value=item.id;
-  document.getElementById('client').value=item.client;
-  document.getElementById('title').value=item.title;
-  document.getElementById('details').value=item.details;
-  document.getElementById('status').value=item.status;
-  document.getElementById('statusMemo').value=item.statusMemo || '';
-  document.getElementById('lastDate').value=item.lastDate;
-  document.getElementById('memo').value=item.memo||'';
-  window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
-}
-function deleteItem(id){ if(!confirm('この案件を削除する？')) return; items=items.filter(i=>i.id!==id); saveData(); renderTable(); }
-function saveItem(){
-  const data=normalizeItem({
-    id:document.getElementById('editId').value||crypto.randomUUID(),
-    client:document.getElementById('client').value.trim(),
-    title:document.getElementById('title').value.trim(),
-    details:document.getElementById('details').value.trim(),
-    status:document.getElementById('status').value.trim(),
-    statusMemo:document.getElementById('statusMemo').value.trim(),
-    lastDate:document.getElementById('lastDate').value,
-    memo:document.getElementById('memo').value.trim()
-  });
-  if(!data.client||!data.title||!data.status||!data.lastDate){ alert('クライアント名・契約名・状況・最終連絡日は入れてね。'); return; }
-  const idx=items.findIndex(i=>i.id===data.id);
-  if(idx>=0) items[idx]=data; else items.push(data);
-  saveData(); resetForm(); renderTable();
-}
-function exportJson(){
-  const blob=new Blob([JSON.stringify(items,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download='副業管理_保存データ.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-function importJson(file){
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const data=JSON.parse(e.target.result);
-      if(!Array.isArray(data)) throw new Error();
-      items=data.map(normalizeItem);
-      saveData(); renderTable(); alert('読み込み完了！');
-    }catch(err){
-      alert('保存データの読み込みに失敗しました。');
+    const initialJobs = [
+      {
+        id: crypto.randomUUID(),
+        priority: "重要",
+        client: "M_Takeuchi",
+        contract: "【在宅副業】AIを使ったライティングのサポートスタッフ募集！未経験OK",
+        work: "1記事あたり、約2,000文字前後\n・AI文章のリライト、調整\n・指定テーマに沿った記事作成\n・簡単なリサーチやキーワード確認\n・文章の流れや構成の整理\n案件によってはSNS投稿文やブログ記事、商品説明文など、さまざまな文章に関わる。",
+        status: "契約中",
+        statusMemo: "記事作成進行中",
+        lastDate: "2026-03-25",
+        memo: "優先度高め。進行中案件。"
+      },
+      {
+        id: crypto.randomUUID(),
+        priority: "普通",
+        client: "mp0119",
+        contract: "《大人気！1件500円》✨美容クリニック・外科・皮膚科✨に関する経験談を教えてください【写真付きで+750円】",
+        work: "美容クリニックのクチコミ\n文章のみの体験談：500円\n画像付きの体験談：1,250円",
+        status: "納品済",
+        statusMemo: "クライアント検収中",
+        lastDate: "2026-03-24",
+        memo: ""
+      },
+      {
+        id: crypto.randomUUID(),
+        priority: "待機",
+        client: "pino_mio",
+        contract: "【初心者歓迎！】youtube等の動画台本作成者さま大募集！【主婦・未経験者活躍中！長期継続・在宅OK】",
+        work: "YouTube等のエンタメ動画の台本の作成\n1週間に1～2本程度",
+        status: "契約リクエスト中",
+        statusMemo: "クライアントの同意待ち",
+        lastDate: "2026-03-23",
+        memo: ""
+      },
+      {
+        id: crypto.randomUUID(),
+        priority: "確認中",
+        client: "Voiceステージ",
+        contract: "【在宅／未経験OK】ライブ配信・音声コンテンツ制作のお仕事",
+        work: "・簡単なトーク／ナレーション収録\n・配信コンテンツ用の音声素材制作\n・台本に沿ったセリフ収録",
+        status: "相談中",
+        statusMemo: "業務内容がライバーになること？それだと契約内容が違うのでクライアントに確認中",
+        lastDate: "2026-03-25",
+        memo: ""
+      },
+      {
+        id: crypto.randomUUID(),
+        priority: "普通",
+        client: "KAGroup",
+        contract: "【在宅・スマホOK】音読するだけの簡単作業｜1000文章 7,500円＋消費税｜継続あり",
+        work: "・1000文章：7,500円＋消費税\n・1文章あたり：約7.5円＋消費税\n・継続の場合、最大9000文章（約67,500円＋消費税）まで依頼可能\n・1000文章：約4〜7時間程度（個人差あり）",
+        status: "納品済",
+        statusMemo: "クライアント検収中",
+        lastDate: "2026-03-25",
+        memo: ""
+      },
+      {
+        id: crypto.randomUUID(),
+        priority: "最重要",
+        client: "AI推進事業部",
+        contract: "【急募】ChatGPTで作ったAIインフルエンサーに喋ってもらう商品紹介動画の台本制作業務【未経験の方でも応募OK】",
+        work: "AIで作った商品紹介系インフルエンサーに読んでもらう台本の制作業務\n約60秒間の縦型動画での使用を想定した台本\nTikTokへの投稿を予定\n¥500(税込) / 台本1本",
+        status: "面談予定",
+        statusMemo: "2026/3/28(土)12時",
+        lastDate: "2026-03-24",
+        memo: "面談を忘れない。事前に質問をメモしておく。"
+      }
+    ];
+
+    function loadJobs(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return initialJobs;
+      try{
+        return JSON.parse(raw);
+      }catch{
+        return initialJobs;
+      }
     }
-  };
-  reader.readAsText(file);
-}
-document.getElementById('saveBtn').addEventListener('click', saveItem);
-document.getElementById('resetBtn').addEventListener('click', resetForm);
-document.getElementById('searchInput').addEventListener('input', renderTable);
-document.getElementById('statusFilter').addEventListener('change', renderTable);
-document.getElementById('sortUrgentBtn').addEventListener('click', ()=>{
-  urgentSort=!urgentSort;
-  document.getElementById('sortUrgentBtn').textContent=urgentSort?'重要順に並べる':'新しい日付順に並べる';
-  renderTable();
-});
-document.getElementById('exportBtn').addEventListener('click', exportJson);
-document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('importFile').click());
-document.getElementById('importFile').addEventListener('change', e=>{ if(e.target.files[0]) importJson(e.target.files[0]); });
-window.editItem=editItem; window.deleteItem=deleteItem; renderTable();
-</script>
+
+    let jobs = loadJobs();
+
+    function saveJobs(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+    }
+
+    function escapeHtml(str){
+      return (str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function nl2br(str){
+      return escapeHtml(str).replace(/\n/g, "<br>");
+    }
+
+    function formatDate(dateStr){
+      if(!dateStr) return "";
+      return dateStr;
+    }
+
+    function renderStats(){
+      const total = jobs.length;
+      const interview = jobs.filter(j => j.status === "面談予定").length;
+      const active = jobs.filter(j => ["契約中","進行中"].includes(j.status)).length;
+      const done = jobs.filter(j => ["納品済"].includes(j.status)).length;
+
+      document.getElementById("statTotal").textContent = total;
+      document.getElementById("statInterview").textContent = interview;
+      document.getElementById("statActive").textContent = active;
+      document.getElementById("statDone").textContent = done;
+    }
+
+    function renderCheckList(filteredJobs){
+      const target = filteredJobs.filter(j => ["面談予定","契約中","進行中"].includes(j.status));
+      const el = document.getElementById("checkList");
+
+      if(target.length === 0){
+        el.innerHTML = '<div class="muted">要チェックの案件はありません。</div>';
+        return;
+      }
+
+      el.innerHTML = target.map(j => `
+        <div class="check-item">
+          <div class="check-client">${escapeHtml(j.client)}</div>
+          <div class="check-status">${escapeHtml(j.status)}${j.statusMemo ? `（${escapeHtml(j.statusMemo)}）` : ""}</div>
+          ${j.memo ? `<div class="check-memo">${escapeHtml(j.memo)}</div>` : ""}
+        </div>
+      `).join("");
+    }
+
+    function getFilteredJobs(){
+      const q = document.getElementById("searchInput").value.trim().toLowerCase();
+      const status = document.getElementById("statusFilter").value;
+      const priority = document.getElementById("priorityFilter").value;
+
+      return jobs.filter(j => {
+        const text = [
+          j.client, j.contract, j.work, j.status, j.statusMemo, j.memo, j.lastDate, j.priority
+        ].join(" ").toLowerCase();
+
+        const matchSearch = !q || text.includes(q);
+        const matchStatus = !status || j.status === status;
+        const matchPriority = !priority || j.priority === priority;
+        return matchSearch && matchStatus && matchPriority;
+      });
+    }
+
+    function renderCards(){
+      const filtered = getFilteredJobs();
+      const cards = document.getElementById("cards");
+
+      cards.innerHTML = filtered.map(j => `
+        <div class="job-card">
+          <div class="job-header">
+            <span class="priority-badge priority-${escapeHtml(j.priority)}">${escapeHtml(j.priority)}</span>
+            <div class="job-actions">
+              <button class="tiny" onclick="editJob('${j.id}')">編集</button>
+              <button class="tiny danger" onclick="deleteJob('${j.id}')">削除</button>
+            </div>
+          </div>
+
+          <div class="job-grid">
+            <div class="field">
+              <div class="label">クライアント</div>
+              <div class="value">${escapeHtml(j.client)}</div>
+            </div>
+
+            <div class="field">
+              <div class="label">状況</div>
+              <div class="value small">
+                <span class="status-pill status-${escapeHtml(j.status)}">${escapeHtml(j.status)}</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="label">契約名</div>
+              <div class="value contract-name">${escapeHtml(j.contract)}</div>
+            </div>
+
+            <div class="field">
+              <div class="label">状況メモ</div>
+              <div class="value small status-memo">${escapeHtml(j.statusMemo || "")}</div>
+            </div>
+
+            <div class="field">
+              <div class="label">業務内容・契約金</div>
+              <div class="value small">${nl2br(j.work || "")}</div>
+            </div>
+
+            <div class="field">
+              <div class="label">最終連絡日</div>
+              <div class="value small">${escapeHtml(formatDate(j.lastDate || ""))}</div>
+            </div>
+
+            <div class="field" style="grid-column:1 / -1;">
+              <div class="label">メモ</div>
+              <div class="value small memo">${nl2br(j.memo || "")}</div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      renderStats();
+      renderCheckList(filtered);
+    }
+
+    function editJob(id){
+      const j = jobs.find(x => x.id === id);
+      if(!j) return;
+
+      document.getElementById("editId").value = j.id;
+      document.getElementById("fPriority").value = j.priority;
+      document.getElementById("fClient").value = j.client;
+      document.getElementById("fContract").value = j.contract;
+      document.getElementById("fWork").value = j.work;
+      document.getElementById("fStatus").value = j.status;
+      document.getElementById("fStatusMemo").value = j.statusMemo || "";
+      document.getElementById("fLastDate").value = j.lastDate || "";
+      document.getElementById("fMemo").value = j.memo || "";
+
+      document.querySelector("details.form-wrap").open = true;
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }
+
+    function deleteJob(id){
+      if(!confirm("この案件を削除しますか？")) return;
+      jobs = jobs.filter(j => j.id !== id);
+      saveJobs();
+      renderCards();
+    }
+
+    window.editJob = editJob;
+    window.deleteJob = deleteJob;
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const id = document.getElementById("editId").value;
+      const data = {
+        id: id || crypto.randomUUID(),
+        priority: document.getElementById("fPriority").value,
+        client: document.getElementById("fClient").value.trim(),
+        contract: document.getElementById("fContract").value.trim(),
+        work: document.getElementById("fWork").value.trim(),
+        status: document.getElementById("fStatus").value,
+        statusMemo: document.getElementById("fStatusMemo").value.trim(),
+        lastDate: document.getElementById("fLastDate").value,
+        memo: document.getElementById("fMemo").value.trim()
+      };
+
+      if(!data.client || !data.contract){
+        alert("クライアント名と契約名は入力してね。");
+        return;
+      }
+
+      const index = jobs.findIndex(j => j.id === data.id);
+      if(index >= 0){
+        jobs[index] = data;
+      }else{
+        jobs.unshift(data);
+      }
+
+      saveJobs();
+      renderCards();
+      resetForm();
+    });
+
+    function resetForm(){
+      document.getElementById("editId").value = "";
+      document.getElementById("fPriority").value = "普通";
+      document.getElementById("fClient").value = "";
+      document.getElementById("fContract").value = "";
+      document.getElementById("fWork").value = "";
+      document.getElementById("fStatus").value = "面談予定";
+      document.getElementById("fStatusMemo").value = "";
+      document.getElementById("fLastDate").value = "";
+      document.getElementById("fMemo").value = "";
+    }
+
+    document.getElementById("resetBtn").addEventListener("click", resetForm);
+
+    document.getElementById("searchInput").addEventListener("input", renderCards);
+    document.getElementById("statusFilter").addEventListener("change", renderCards);
+    document.getElementById("priorityFilter").addEventListener("change", renderCards);
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(jobs, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sidejob_data.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("importBtn").addEventListener("click", () => {
+      document.getElementById("importFile").click();
+    });
+
+    document.getElementById("importFile").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+
+      try{
+        const text = await file.text();
+        const imported = JSON.parse(text);
+        if(!Array.isArray(imported)) throw new Error("invalid");
+        jobs = imported;
+        saveJobs();
+        renderCards();
+        alert("保存データを読み込みました。");
+      }catch{
+        alert("読み込みに失敗しました。JSONファイルを確認してください。");
+      }
+
+      e.target.value = "";
+    });
+
+    renderCards();
+  </script>
 </body>
 </html>
