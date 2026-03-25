@@ -35,6 +35,7 @@
       color:var(--text);
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
       overflow-x:hidden;
+      scroll-behavior:smooth;
     }
 
     body{
@@ -94,7 +95,6 @@
       background:#fff;
     }
 
-    /* 上部 */
     .top-grid{
       display:grid;
       grid-template-columns:1.65fr 1fr;
@@ -146,6 +146,18 @@
       background:#fffafb;
       border-radius:16px;
       padding:14px;
+      cursor:pointer;
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+
+    .check-item:hover{
+      transform:translateY(-1px);
+      box-shadow:0 8px 20px rgba(58,45,53,.06);
+      border-color:#e3a8bd;
+    }
+
+    .check-item:active{
+      transform:translateY(0);
     }
 
     .check-client{
@@ -167,7 +179,6 @@
       overflow-wrap:anywhere;
     }
 
-    /* フィルター */
     .filters{
       display:grid;
       grid-template-columns:minmax(240px,1.2fr) minmax(180px,.9fr) minmax(180px,.8fr) minmax(220px,.9fr) auto;
@@ -213,7 +224,6 @@
       accent-color:#b98aa0;
     }
 
-    /* カード */
     .cards{
       display:grid;
       gap:16px;
@@ -227,6 +237,7 @@
       padding:20px 24px;
       display:grid;
       gap:14px;
+      scroll-margin-top:20px;
     }
 
     .job-card.stale{
@@ -236,6 +247,16 @@
 
     .job-card.ended{
       opacity:.92;
+    }
+
+    .job-card.jump-target{
+      animation:flashCard 1.4s ease;
+    }
+
+    @keyframes flashCard{
+      0%   { box-shadow:0 0 0 0 rgba(233,166,188,.00); }
+      20%  { box-shadow:0 0 0 6px rgba(233,166,188,.22); }
+      100% { box-shadow:var(--shadow); }
     }
 
     .job-header{
@@ -312,6 +333,13 @@
       font-weight:500;
     }
 
+    .status-block{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      gap:8px;
+    }
+
     .status-pill{
       display:inline-block;
       padding:7px 12px;
@@ -366,7 +394,15 @@
       vertical-align:middle;
     }
 
-    /* フォーム */
+    .status-memo-inline{
+      color:var(--text);
+      font-size:16px;
+      font-weight:500;
+      line-height:1.45;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+    }
+
     details.form-wrap{
       margin-top:18px;
     }
@@ -475,6 +511,10 @@
         font-size:15px;
       }
 
+      .status-memo-inline{
+        font-size:15px;
+      }
+
       .form-grid{
         grid-template-columns:1fr;
       }
@@ -544,6 +584,7 @@
 
         <select id="sortOrder">
           <option value="">並び替えなし</option>
+          <option value="priority">重要順</option>
           <option value="new">最終連絡日（新しい順）</option>
           <option value="old">最終連絡日（古い順）</option>
         </select>
@@ -631,8 +672,20 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "sidejob_manager_v7";
-    const UI_STORAGE_KEY = "sidejob_manager_ui_v3";
+    const STORAGE_KEY = "sidejob_manager_v8";
+    const UI_STORAGE_KEY = "sidejob_manager_ui_v4";
+
+    const PRIORITY_ORDER = {
+      "最重要": 0,
+      "重要": 1,
+      "確認中": 2,
+      "普通": 3,
+      "待機": 4
+    };
+
+    const STATUS_SORT_ORDER = {
+      "終了": 99
+    };
 
     const initialJobs = [
       {
@@ -663,8 +716,8 @@
         client: "pino_mio",
         contract: "【初心者歓迎！】youtube等の動画台本作成者さま大募集！【主婦・未経験者活躍中！長期継続・在宅OK】",
         work: "YouTube等のエンタメ動画の台本の作成\n1週間に1～2本程度",
-        status: "契約リクエスト中",
-        statusMemo: "クライアントの同意待ち",
+        status: "契約中",
+        statusMemo: "",
         lastDate: "2026-03-23",
         memo: ""
       },
@@ -782,6 +835,16 @@
       document.getElementById("statDone").textContent = visibleJobs.filter(j => j.status === "納品済").length;
     }
 
+    function scrollToJob(id){
+      const el = document.getElementById(`job-${id}`);
+      if(!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.remove("jump-target");
+      void el.offsetWidth;
+      el.classList.add("jump-target");
+      setTimeout(() => el.classList.remove("jump-target"), 1500);
+    }
+
     function renderCheckList(filteredJobs){
       const target = filteredJobs.filter(j => ["面談予定","契約中"].includes(j.status));
       const el = document.getElementById("checkList");
@@ -792,7 +855,7 @@
       }
 
       el.innerHTML = target.map(j => `
-        <div class="check-item">
+        <div class="check-item" onclick="scrollToJob('${j.id}')">
           <div class="check-client">${escapeHtml(j.client)}</div>
           <div class="check-status">
             ${escapeHtml(j.status)}${j.statusMemo ? `（${escapeHtml(j.statusMemo)}）` : ""}
@@ -801,6 +864,11 @@
           ${j.memo ? `<div class="check-memo">${escapeHtml(j.memo)}</div>` : ""}
         </div>
       `).join("");
+    }
+
+    function getPriorityRank(job){
+      if(job.status === "終了") return STATUS_SORT_ORDER["終了"];
+      return PRIORITY_ORDER[job.priority] ?? 50;
     }
 
     function getFilteredJobs(){
@@ -826,6 +894,12 @@
         result.sort((a, b) => (b.lastDate || "").localeCompare(a.lastDate || ""));
       } else if(sort === "old"){
         result.sort((a, b) => (a.lastDate || "").localeCompare(b.lastDate || ""));
+      } else if(sort === "priority"){
+        result.sort((a, b) => {
+          const priorityDiff = getPriorityRank(a) - getPriorityRank(b);
+          if(priorityDiff !== 0) return priorityDiff;
+          return (b.lastDate || "").localeCompare(a.lastDate || "");
+        });
       }
 
       return result;
@@ -836,7 +910,7 @@
       const cards = document.getElementById("cards");
 
       cards.innerHTML = filtered.map(j => `
-        <div class="job-card ${isStale(j) ? "stale" : ""} ${j.status === "終了" ? "ended" : ""}">
+        <div class="job-card ${isStale(j) ? "stale" : ""} ${j.status === "終了" ? "ended" : ""}" id="job-${j.id}">
           <div class="job-header">
             <span class="priority-badge priority-${escapeHtml(j.priority)}">${escapeHtml(j.priority)}</span>
             <div class="job-actions">
@@ -853,20 +927,18 @@
 
             <div class="field">
               <div class="label">状況</div>
-              <div class="value small">
-                <span class="status-pill status-${escapeHtml(j.status)}">${escapeHtml(j.status)}</span>
-                ${isStale(j) ? '<span class="alert-badge">1週間以上連絡なし</span>' : ""}
+              <div class="status-block">
+                <div class="value small">
+                  <span class="status-pill status-${escapeHtml(j.status)}">${escapeHtml(j.status)}</span>
+                  ${isStale(j) ? '<span class="alert-badge">1週間以上連絡なし</span>' : ""}
+                </div>
+                ${j.statusMemo ? `<div class="status-memo-inline">${escapeHtml(j.statusMemo)}</div>` : ""}
               </div>
             </div>
 
             <div class="field">
               <div class="label">契約名</div>
               <div class="value contract-name">${escapeHtml(j.contract)}</div>
-            </div>
-
-            <div class="field">
-              <div class="label">状況メモ</div>
-              <div class="value small">${escapeHtml(j.statusMemo || "")}</div>
             </div>
 
             <div class="field">
@@ -918,6 +990,7 @@
 
     window.editJob = editJob;
     window.deleteJob = deleteJob;
+    window.scrollToJob = scrollToJob;
 
     document.getElementById("saveBtn").addEventListener("click", () => {
       const id = document.getElementById("editId").value;
@@ -1007,7 +1080,7 @@
         renderCards();
         alert("保存データを読み込みました。");
       }catch{
-        alert("読み込みに失敗しました。JSONファイルを確認してください。");
+        alert("読み込みに失敗しました。データファイルを確認してください。");
       }
 
       e.target.value = "";
