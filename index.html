@@ -17,6 +17,10 @@
       --purple:#ece4ff;
       --blue:#eaf3ff;
       --danger:#ffe2e2;
+      --gray:#f3f3f3;
+      --gray-line:#d0d0d0;
+      --alert-bg:#fff1f1;
+      --alert-line:#f2a7a7;
       --shadow:0 8px 24px rgba(58,45,53,.06);
       --radius:18px;
     }
@@ -115,9 +119,10 @@
 
     .filters{
       display:grid;
-      grid-template-columns:1.2fr .8fr .8fr .9fr;
+      grid-template-columns:1.2fr .9fr .8fr .9fr auto;
       gap:10px;
       margin-bottom:16px;
+      align-items:center;
     }
 
     input, select, textarea{
@@ -127,6 +132,20 @@
       padding:12px 14px;
       background:#fff;
       color:var(--text);
+    }
+
+    .toggle-box{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      padding:0 4px;
+    }
+
+    .toggle-box input[type="checkbox"]{
+      width:auto;
+      margin:0;
+      transform:scale(1.1);
     }
 
     .section-title{
@@ -179,6 +198,15 @@
       padding:16px;
       display:grid;
       gap:12px;
+    }
+
+    .job-card.stale{
+      border-color:var(--alert-line);
+      background:var(--alert-bg);
+    }
+
+    .job-card.ended{
+      opacity:.92;
     }
 
     .job-header{
@@ -268,10 +296,6 @@
       background:#eef9ef;
       border-color:#bfe3c4;
     }
-    .status-進行中{
-      background:#eef9ef;
-      border-color:#bfe3c4;
-    }
     .status-納品済{
       background:#eef4ff;
       border-color:#c7d8ff;
@@ -283,6 +307,24 @@
     .status-契約リクエスト中{
       background:#f1ebff;
       border-color:#d8cbff;
+    }
+    .status-終了{
+      background:var(--gray);
+      border-color:var(--gray-line);
+      color:#666;
+    }
+
+    .alert-badge{
+      display:inline-block;
+      margin-left:8px;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      background:#ffdfdf;
+      color:#a94442;
+      border:1px solid #f0b4b4;
+      vertical-align:middle;
     }
 
     details.form-wrap{
@@ -409,11 +451,11 @@
           <div class="stat-value" id="statInterview">0</div>
         </div>
         <div class="stat">
-          <div class="stat-label">進行中・契約中</div>
+          <div class="stat-label">契約中</div>
           <div class="stat-value" id="statActive">0</div>
         </div>
         <div class="stat">
-          <div class="stat-label">検収・納品後</div>
+          <div class="stat-label">納品済</div>
           <div class="stat-value" id="statDone">0</div>
         </div>
       </div>
@@ -426,10 +468,10 @@
           <option value="">すべての状況</option>
           <option value="面談予定">面談予定</option>
           <option value="契約中">契約中</option>
-          <option value="進行中">進行中</option>
           <option value="納品済">納品済</option>
           <option value="相談中">相談中</option>
           <option value="契約リクエスト中">契約リクエスト中</option>
+          <option value="終了">終了</option>
         </select>
         <select id="priorityFilter">
           <option value="">すべての優先</option>
@@ -444,6 +486,10 @@
           <option value="new">最終連絡日（新しい順）</option>
           <option value="old">最終連絡日（古い順）</option>
         </select>
+        <label class="toggle-box">
+          <input type="checkbox" id="showEnded">
+          <span>終了を表示</span>
+        </label>
       </div>
     </div>
 
@@ -491,10 +537,10 @@
             <select id="fStatus">
               <option>面談予定</option>
               <option>契約中</option>
-              <option>進行中</option>
               <option>納品済</option>
               <option>相談中</option>
               <option>契約リクエスト中</option>
+              <option>終了</option>
             </select>
           </div>
 
@@ -518,13 +564,14 @@
           <button id="saveBtn">保存する</button>
           <button id="resetBtn" type="button">入力をリセット</button>
         </div>
-        <div class="muted" style="margin-top:10px;">「面談予定」「契約中」「進行中」は要チェックに自動表示されます。</div>
+        <div class="muted" style="margin-top:10px;">「面談予定」「契約中」は要チェックに自動表示されます。最終連絡日から7日以上たつと赤く表示されます。</div>
       </details>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "sidejob_manager_v4";
+    const STORAGE_KEY = "sidejob_manager_v5";
+    const UI_STORAGE_KEY = "sidejob_manager_ui_v1";
 
     const initialJobs = [
       {
@@ -605,10 +652,25 @@
       }
     }
 
+    function loadUiState(){
+      const raw = localStorage.getItem(UI_STORAGE_KEY);
+      if(!raw) return { showEnded: false };
+      try{
+        return JSON.parse(raw);
+      }catch{
+        return { showEnded: false };
+      }
+    }
+
     let jobs = loadJobs();
+    let uiState = loadUiState();
 
     function saveJobs(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(jobs));
+    }
+
+    function saveUiState(){
+      localStorage.setItem(UI_STORAGE_KEY, JSON.stringify(uiState));
     }
 
     function escapeHtml(str){
@@ -628,11 +690,28 @@
       return dateStr;
     }
 
+    function daysSince(dateStr){
+      if(!dateStr) return null;
+      const d = new Date(dateStr + "T00:00:00");
+      if(Number.isNaN(d.getTime())) return null;
+      const today = new Date();
+      const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const diffMs = todayOnly - d;
+      return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    }
+
+    function isStale(job){
+      if(job.status === "終了") return false;
+      const days = daysSince(job.lastDate);
+      return days !== null && days >= 7;
+    }
+
     function renderStats(){
-      const total = jobs.length;
-      const interview = jobs.filter(j => j.status === "面談予定").length;
-      const active = jobs.filter(j => ["契約中","進行中"].includes(j.status)).length;
-      const done = jobs.filter(j => ["納品済"].includes(j.status)).length;
+      const visibleJobs = jobs.filter(j => uiState.showEnded || j.status !== "終了");
+      const total = visibleJobs.length;
+      const interview = visibleJobs.filter(j => j.status === "面談予定").length;
+      const active = visibleJobs.filter(j => j.status === "契約中").length;
+      const done = visibleJobs.filter(j => j.status === "納品済").length;
 
       document.getElementById("statTotal").textContent = total;
       document.getElementById("statInterview").textContent = interview;
@@ -641,7 +720,7 @@
     }
 
     function renderCheckList(filteredJobs){
-      const target = filteredJobs.filter(j => ["面談予定","契約中","進行中"].includes(j.status));
+      const target = filteredJobs.filter(j => ["面談予定","契約中"].includes(j.status));
       const el = document.getElementById("checkList");
 
       if(target.length === 0){
@@ -652,7 +731,10 @@
       el.innerHTML = target.map(j => `
         <div class="check-item">
           <div class="check-client">${escapeHtml(j.client)}</div>
-          <div class="check-status">${escapeHtml(j.status)}${j.statusMemo ? `（${escapeHtml(j.statusMemo)}）` : ""}</div>
+          <div class="check-status">
+            ${escapeHtml(j.status)}${j.statusMemo ? `（${escapeHtml(j.statusMemo)}）` : ""}
+            ${isStale(j) ? '<span class="alert-badge">1週間以上連絡なし</span>' : ""}
+          </div>
           ${j.memo ? `<div class="check-memo">${escapeHtml(j.memo)}</div>` : ""}
         </div>
       `).join("");
@@ -672,7 +754,9 @@
         const matchSearch = !q || text.includes(q);
         const matchStatus = !status || j.status === status;
         const matchPriority = !priority || j.priority === priority;
-        return matchSearch && matchStatus && matchPriority;
+        const matchEnded = uiState.showEnded || j.status !== "終了";
+
+        return matchSearch && matchStatus && matchPriority && matchEnded;
       });
 
       if(sort === "new"){
@@ -689,7 +773,7 @@
       const cards = document.getElementById("cards");
 
       cards.innerHTML = filtered.map(j => `
-        <div class="job-card">
+        <div class="job-card ${isStale(j) ? "stale" : ""} ${j.status === "終了" ? "ended" : ""}">
           <div class="job-header">
             <span class="priority-badge priority-${escapeHtml(j.priority)}">${escapeHtml(j.priority)}</span>
             <div class="job-actions">
@@ -708,6 +792,7 @@
               <div class="label">状況</div>
               <div class="value small">
                 <span class="status-pill status-${escapeHtml(j.status)}">${escapeHtml(j.status)}</span>
+                ${isStale(j) ? '<span class="alert-badge">1週間以上連絡なし</span>' : ""}
               </div>
             </div>
 
@@ -821,6 +906,13 @@
     document.getElementById("priorityFilter").addEventListener("change", renderCards);
     document.getElementById("sortOrder").addEventListener("change", renderCards);
 
+    document.getElementById("showEnded").checked = !!uiState.showEnded;
+    document.getElementById("showEnded").addEventListener("change", (e) => {
+      uiState.showEnded = e.target.checked;
+      saveUiState();
+      renderCards();
+    });
+
     document.getElementById("exportBtn").addEventListener("click", () => {
       const blob = new Blob([JSON.stringify(jobs, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
@@ -843,7 +935,10 @@
         const text = await file.text();
         const imported = JSON.parse(text);
         if(!Array.isArray(imported)) throw new Error("invalid");
-        jobs = imported;
+        jobs = imported.map(j => ({
+          ...j,
+          status: j.status === "進行中" ? "契約中" : j.status
+        }));
         saveJobs();
         renderCards();
         alert("保存データを読み込みました。");
@@ -853,6 +948,12 @@
 
       e.target.value = "";
     });
+
+    jobs = jobs.map(j => ({
+      ...j,
+      status: j.status === "進行中" ? "契約中" : j.status
+    }));
+    saveJobs();
 
     renderCards();
   </script>
