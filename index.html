@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>副業管理</title>
   <style>
     :root{
@@ -57,6 +57,49 @@
     .status-block{display:flex;flex-direction:column;gap:6px}
     .status-memo{font-size:12px;color:var(--muted);line-height:1.5;background:#faf7f9;border:1px dashed var(--line);padding:8px 10px;border-radius:10px}
     @media (max-width:900px){.top-grid,.form-grid,.stats{grid-template-columns:1fr}.wrap{padding:14px}h1{font-size:24px}}
+    @media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .top-grid,
+  .main-grid,
+  .table-head,
+  .item-row,
+  .row {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .card,
+  .panel,
+  .item-card {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .item-row > div,
+  .row > div,
+  .cell {
+    width: 100% !important;
+    display: block !important;
+    margin-bottom: 8px;
+  }
+
+  .contract-name,
+  .client-name,
+  .memo,
+  .status-memo {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
   </style>
 </head>
 <body>
