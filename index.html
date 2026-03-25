@@ -115,7 +115,7 @@
 
     .filters{
       display:grid;
-      grid-template-columns:1.2fr .8fr .8fr;
+      grid-template-columns:1.2fr .8fr .8fr .9fr;
       gap:10px;
       margin-bottom:16px;
     }
@@ -439,6 +439,11 @@
           <option value="普通">普通</option>
           <option value="待機">待機</option>
         </select>
+        <select id="sortOrder">
+          <option value="">並び替えなし</option>
+          <option value="new">最終連絡日（新しい順）</option>
+          <option value="old">最終連絡日（古い順）</option>
+        </select>
       </div>
     </div>
 
@@ -657,8 +662,9 @@
       const q = document.getElementById("searchInput").value.trim().toLowerCase();
       const status = document.getElementById("statusFilter").value;
       const priority = document.getElementById("priorityFilter").value;
+      const sort = document.getElementById("sortOrder").value;
 
-      return jobs.filter(j => {
+      let result = jobs.filter(j => {
         const text = [
           j.client, j.contract, j.work, j.status, j.statusMemo, j.memo, j.lastDate, j.priority
         ].join(" ").toLowerCase();
@@ -668,6 +674,14 @@
         const matchPriority = !priority || j.priority === priority;
         return matchSearch && matchStatus && matchPriority;
       });
+
+      if(sort === "new"){
+        result.sort((a, b) => (b.lastDate || "").localeCompare(a.lastDate || ""));
+      } else if(sort === "old"){
+        result.sort((a, b) => (a.lastDate || "").localeCompare(b.lastDate || ""));
+      }
+
+      return result;
     }
 
     function renderCards(){
@@ -805,6 +819,7 @@
     document.getElementById("searchInput").addEventListener("input", renderCards);
     document.getElementById("statusFilter").addEventListener("change", renderCards);
     document.getElementById("priorityFilter").addEventListener("change", renderCards);
+    document.getElementById("sortOrder").addEventListener("change", renderCards);
 
     document.getElementById("exportBtn").addEventListener("click", () => {
       const blob = new Blob([JSON.stringify(jobs, null, 2)], { type: "application/json" });
