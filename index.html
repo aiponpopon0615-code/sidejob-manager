@@ -11,7 +11,6 @@
       --line:#eadde5;
       --text:#3a2d35;
       --muted:#7a6871;
-      --pink:#ffeaf3;
       --yellow:#fff3bf;
       --green:#daf5df;
       --purple:#ece4ff;
@@ -25,7 +24,10 @@
       --radius:18px;
     }
 
-    *{box-sizing:border-box}
+    *{
+      box-sizing:border-box;
+    }
+
     html,body{
       margin:0;
       padding:0;
@@ -46,7 +48,7 @@
     }
 
     h1{
-      margin:0 0 16px;
+      margin:0 0 18px;
       font-size:32px;
       line-height:1.2;
     }
@@ -92,7 +94,7 @@
       background:#fff;
     }
 
-    /* 上部レイアウト：左に統計、右に要チェック */
+    /* 上部 */
     .top-grid{
       display:grid;
       grid-template-columns:1.65fr 1fr;
@@ -137,7 +139,6 @@
     .check-list{
       display:grid;
       gap:12px;
-      max-height:100%;
     }
 
     .check-item{
@@ -166,20 +167,33 @@
       overflow-wrap:anywhere;
     }
 
+    /* フィルター */
     .filters{
       display:grid;
-      grid-template-columns:1.2fr .9fr .8fr .9fr auto;
+      grid-template-columns:minmax(240px,1.2fr) minmax(180px,.9fr) minmax(180px,.8fr) minmax(220px,.9fr) auto;
       gap:10px;
       align-items:center;
     }
 
-    input, select, textarea{
+    input[type="text"],
+    input[type="date"],
+    select,
+    textarea{
       width:100%;
       border:1px solid var(--line);
       border-radius:12px;
       padding:12px 14px;
       background:#fff;
       color:var(--text);
+      appearance:auto;
+      -webkit-appearance:auto;
+      -moz-appearance:auto;
+      min-height:48px;
+    }
+
+    textarea{
+      min-height:auto;
+      resize:vertical;
     }
 
     .toggle-box{
@@ -188,14 +202,18 @@
       gap:8px;
       white-space:nowrap;
       padding:0 4px;
+      min-height:48px;
     }
 
     .toggle-box input[type="checkbox"]{
       width:auto;
+      min-height:auto;
       margin:0;
-      transform:scale(1.1);
+      transform:scale(1.15);
+      accent-color:#b98aa0;
     }
 
+    /* カード */
     .cards{
       display:grid;
       gap:16px;
@@ -260,7 +278,6 @@
       background:var(--danger);
     }
 
-    /* PCで横長に見やすく */
     .job-grid{
       display:grid;
       grid-template-columns:1.35fr .65fr;
@@ -309,22 +326,27 @@
       background:#ffe8ee;
       border-color:#f6c1cf;
     }
+
     .status-契約中{
       background:#eef9ef;
       border-color:#bfe3c4;
     }
+
     .status-納品済{
       background:#eef4ff;
       border-color:#c7d8ff;
     }
+
     .status-相談中{
       background:#fff5df;
       border-color:#ecd7a1;
     }
+
     .status-契約リクエスト中{
       background:#f1ebff;
       border-color:#d8cbff;
     }
+
     .status-終了{
       background:var(--gray);
       border-color:var(--gray-line);
@@ -344,6 +366,7 @@
       vertical-align:middle;
     }
 
+    /* フォーム */
     details.form-wrap{
       margin-top:18px;
     }
@@ -499,6 +522,7 @@
     <div class="panel">
       <div class="filters">
         <input id="searchInput" type="text" placeholder="検索（クライアント名・契約名・状況メモなど）">
+
         <select id="statusFilter">
           <option value="">すべての状況</option>
           <option value="面談予定">面談予定</option>
@@ -508,6 +532,7 @@
           <option value="契約リクエスト中">契約リクエスト中</option>
           <option value="終了">終了</option>
         </select>
+
         <select id="priorityFilter">
           <option value="">すべての優先</option>
           <option value="最重要">最重要</option>
@@ -516,11 +541,13 @@
           <option value="普通">普通</option>
           <option value="待機">待機</option>
         </select>
+
         <select id="sortOrder">
           <option value="">並び替えなし</option>
           <option value="new">最終連絡日（新しい順）</option>
           <option value="old">最終連絡日（古い順）</option>
         </select>
+
         <label class="toggle-box">
           <input type="checkbox" id="showEnded">
           <span>終了を表示</span>
@@ -533,6 +560,7 @@
     <div class="panel">
       <details class="form-wrap">
         <summary>案件を追加 / 編集</summary>
+
         <div class="form-grid">
           <input type="hidden" id="editId">
 
@@ -594,14 +622,17 @@
           <button id="saveBtn">保存する</button>
           <button id="resetBtn" type="button">入力をリセット</button>
         </div>
-        <div class="muted" style="margin-top:10px;">「面談予定」「契約中」は要チェックに自動表示されます。最終連絡日から7日以上たつと赤く表示されます。</div>
+
+        <div class="muted" style="margin-top:10px;">
+          「面談予定」「契約中」は要チェックに自動表示されます。最終連絡日から7日以上たつと赤く表示されます。
+        </div>
       </details>
     </div>
   </div>
 
   <script>
-    const STORAGE_KEY = "sidejob_manager_v6";
-    const UI_STORAGE_KEY = "sidejob_manager_ui_v2";
+    const STORAGE_KEY = "sidejob_manager_v7";
+    const UI_STORAGE_KEY = "sidejob_manager_ui_v3";
 
     const initialJobs = [
       {
@@ -692,7 +723,11 @@
       }
     }
 
-    let jobs = loadJobs();
+    let jobs = loadJobs().map(j => ({
+      ...j,
+      status: j.status === "進行中" ? "契約中" : j.status
+    }));
+
     let uiState = loadUiState();
 
     function saveJobs(){
@@ -831,7 +866,7 @@
 
             <div class="field">
               <div class="label">状況メモ</div>
-              <div class="value small status-memo">${escapeHtml(j.statusMemo || "")}</div>
+              <div class="value small">${escapeHtml(j.statusMemo || "")}</div>
             </div>
 
             <div class="field">
@@ -846,7 +881,7 @@
 
             <div class="field full">
               <div class="label">メモ</div>
-              <div class="value small memo">${nl2br(j.memo || "")}</div>
+              <div class="value small">${nl2br(j.memo || "")}</div>
             </div>
           </div>
         </div>
@@ -962,10 +997,12 @@
         const text = await file.text();
         const imported = JSON.parse(text);
         if(!Array.isArray(imported)) throw new Error("invalid");
+
         jobs = imported.map(j => ({
           ...j,
           status: j.status === "進行中" ? "契約中" : j.status
         }));
+
         saveJobs();
         renderCards();
         alert("保存データを読み込みました。");
@@ -976,12 +1013,7 @@
       e.target.value = "";
     });
 
-    jobs = jobs.map(j => ({
-      ...j,
-      status: j.status === "進行中" ? "契約中" : j.status
-    }));
     saveJobs();
-
     renderCards();
   </script>
 </body>
